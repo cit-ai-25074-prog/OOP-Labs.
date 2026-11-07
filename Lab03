@@ -1,0 +1,237 @@
+// ============================================================
+// CIT-AI - Object Oriented Programming 2026-2027
+// LAB-03 : All Tasks in one file
+// Objective: string functions, structures, nested structures,
+//            pointer to objects and array of objects
+// ============================================================
+
+#include <iostream>
+#include <string>
+#include <iomanip>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
+
+const int STOCK_SIZE = 10; // at least 10 inventory items
+
+// ============================================================
+// Task 01 (Part 1): Inventory Item with integer item code
+// ============================================================
+
+struct InventoryItem
+{
+    int code;            // auto-generated item code
+    string name;         // item name
+    double cost;         // cost price
+    double sellingPrice; // cost + 40% profit
+};
+
+// Takes name and cost from the user, generates code and selling price
+InventoryItem insertItem()
+{
+    InventoryItem item;
+
+    cin.ignore(1000, '\n');
+    cout << "Enter item name: ";
+    getline(cin, item.name);
+    cout << "Enter item cost: ";
+    cin >> item.cost;
+
+    item.code = rand() % 9000 + 1000;   // random code between 1000 and 9999
+    item.sellingPrice = item.cost * 1.40; // 40% profit on cost
+
+    return item;
+}
+
+// Displays all items in a table
+void displayStock(const InventoryItem* items)
+{
+    cout << "\n" << left << setw(10) << "Code"
+         << setw(20) << "Name"
+         << setw(12) << "Cost"
+         << setw(12) << "Price" << endl;
+    cout << string(54, '-') << endl;
+
+    for (int i = 0; i < STOCK_SIZE; i++)
+    {
+        cout << left << setw(10) << items[i].code
+             << setw(20) << items[i].name
+             << setw(12) << fixed << setprecision(2) << items[i].cost
+             << setw(12) << items[i].sellingPrice << endl;
+    }
+}
+
+void task01_part1()
+{
+    InventoryItem stock[STOCK_SIZE];
+
+    for (int i = 0; i < STOCK_SIZE; i++)
+    {
+        cout << "\nItem " << i + 1 << ":" << endl;
+        stock[i] = insertItem();
+    }
+    displayStock(stock);
+}
+
+// ============================================================
+// Task 01 (Part 2): Item code as string (e.g. COM_31203)
+// ============================================================
+
+struct InventoryItem2
+{
+    string code;         // first 3 chars (upper case) + "_" + running number
+    string name;
+    double cost;
+    double sellingPrice;
+};
+
+int runningNumber = 31203; // running integer for the item code
+
+InventoryItem2 insertItem2()
+{
+    InventoryItem2 item;
+
+    cin.ignore(1000, '\n');
+    cout << "Enter item name: ";
+    getline(cin, item.name);
+    cout << "Enter item cost: ";
+    cin >> item.cost;
+
+    // get first three characters of the name
+    string prefix = item.name.substr(0, 3);
+
+    // convert them to upper case
+    for (size_t i = 0; i < prefix.length(); i++)
+        prefix[i] = toupper(prefix[i]);
+
+    // concatenate: PREFIX + "_" + number
+    item.code = prefix + "_" + to_string(runningNumber);
+    runningNumber++;
+
+    item.sellingPrice = item.cost * 1.40;
+    return item;
+}
+
+void displayStock2(const InventoryItem2* items)
+{
+    cout << "\n" << left << setw(14) << "Code"
+         << setw(20) << "Name"
+         << setw(12) << "Cost"
+         << setw(12) << "Price" << endl;
+    cout << string(58, '-') << endl;
+
+    for (int i = 0; i < STOCK_SIZE; i++)
+    {
+        cout << left << setw(14) << items[i].code
+             << setw(20) << items[i].name
+             << setw(12) << fixed << setprecision(2) << items[i].cost
+             << setw(12) << items[i].sellingPrice << endl;
+    }
+}
+
+void task01_part2()
+{
+    InventoryItem2 stock[STOCK_SIZE];
+
+    for (int i = 0; i < STOCK_SIZE; i++)
+    {
+        cout << "\nItem " << i + 1 << ":" << endl;
+        stock[i] = insertItem2();
+    }
+    displayStock2(stock);
+}
+
+// ============================================================
+// Task 02: Carpet Cost Estimation (nested structures + dynamic array)
+// ============================================================
+
+struct FeetInches
+{
+    int feet;
+    int inches;
+};
+
+struct RoomDimension
+{
+    FeetInches length;
+    FeetInches width;
+};
+
+const double PRICE_PER_SQ_FOOT = 18.0; // Rs. 18 per square foot
+
+// Calculates the carpet cost of one room
+double computeTheCarpetingCost(const RoomDimension& room)
+{
+    double length = room.length.feet + room.length.inches / 12.0;
+    double width = room.width.feet + room.width.inches / 12.0;
+    double area = length * width; // square feet
+    return area * PRICE_PER_SQ_FOOT;
+}
+
+void task02()
+{
+    int numRooms;
+    cout << "Enter the number of rooms in your house: ";
+    cin >> numRooms;
+
+    // dynamic array of rooms
+    RoomDimension* rooms = new RoomDimension[numRooms];
+
+    for (int i = 0; i < numRooms; i++)
+    {
+        cout << "\nRoom " << i + 1 << ":" << endl;
+        cout << "Length (feet inches): ";
+        cin >> rooms[i].length.feet >> rooms[i].length.inches;
+        cout << "Width (feet inches): ";
+        cin >> rooms[i].width.feet >> rooms[i].width.inches;
+    }
+
+    int choice;
+    do
+    {
+        cout << "\n===== Menu =====" << endl;
+        cout << "1) Total carpeting cost of the house" << endl;
+        cout << "2) Carpeting cost of each room" << endl;
+        cout << "3) Exit" << endl;
+        cout << "Choose: ";
+        cin >> choice;
+
+        if (choice == 1)
+        {
+            double total = 0;
+            for (int i = 0; i < numRooms; i++)
+                total += computeTheCarpetingCost(rooms[i]);
+            cout << "Total cost: Rs. " << fixed << setprecision(2) << total << endl;
+        }
+        else if (choice == 2)
+        {
+            for (int i = 0; i < numRooms; i++)
+                cout << "Room " << i + 1 << ": Rs. " << fixed << setprecision(2)
+                     << computeTheCarpetingCost(rooms[i]) << endl;
+        }
+    } while (choice != 3);
+
+    delete[] rooms; // free memory
+    rooms = nullptr;
+}
+
+// ============================================================
+// main
+// ============================================================
+int main()
+{
+    srand(time(0)); // seed for random item codes
+
+    int choice;
+    cout << "LAB-03\n1) Task 01 (Part 1)\n2) Task 01 (Part 2)\n3) Task 02\nChoose: ";
+    cin >> choice;
+
+    switch (choice)
+    {
+    case 1: task01_part1(); break;
+    case 2: task01_part2(); break;
+    case 3: task02(); break;
+    default: cout << "Invalid choice." << endl;
+    }
+    return 0;
+}
